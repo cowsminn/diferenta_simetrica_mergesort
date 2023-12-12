@@ -1,12 +1,12 @@
 #include <iostream>
-
+#include <vector>
 using namespace std;
 
-void merge(int arr[], int left, int middle, int right) {
+void merge(vector<int>& arr, int left, int middle, int right) {
     int n1 = middle - left + 1;
     int n2 = right - middle;
 
-    int L[n1], R[n2];
+    vector<int> L(n1), R(n2);
 
     for (int i = 0; i < n1; i++)
         L[i] = arr[left + i];
@@ -39,7 +39,7 @@ void merge(int arr[], int left, int middle, int right) {
     }
 }
 
-void mergeSort(int arr[], int left, int right) {
+void mergeSort(vector<int>& arr, int left, int right) {
     if (left < right) {
         int middle = left + (right - left) / 2;
 
@@ -50,12 +50,8 @@ void mergeSort(int arr[], int left, int right) {
     }
 }
 
-void diferentaSimetrica(int A[], int m, int B[], int n, int rezultat[], int& k) {
-    // Sortăm cele două multimi
-    mergeSort(A, 0, m - 1);
-    mergeSort(B, 0, n - 1);
-
-    int i = 0, j = 0;
+void diferentaSimetrica(const vector<int>& A, int m, const vector<int>& B, int n, vector<int>& rezultat) {
+    int i = 0, j = 0, k = 0;
 
     while (i < m && j < n) {
         if (A[i] < B[j]) {
@@ -91,23 +87,24 @@ void diferentaSimetrica(int A[], int m, int B[], int n, int rezultat[], int& k) 
             j++;
         }
     }
+
+    rezultat.resize(k);
 }
 
 int main() {
-    int A[] = {1, 2, 3, 4, 5, 6};
-    int m = sizeof(A) / sizeof(A[0]);
+    vector<int> A = {1, 2, 3, 4, 5, 6};
+    int m = A.size();
 
-    int B[] = {2, 3, 4, 7};
-    int n = sizeof(B) / sizeof(B[0]);
+    vector<int> B = {2, 3, 4, 7};
+    int n = B.size();
 
-    int rezultat[m + n];
-    int k = 0;
+    vector<int> rezultat(m + n);
 
-    diferentaSimetrica(A, m, B, n, rezultat, k);
+    diferentaSimetrica(A, m, B, n, rezultat);
 
     cout << "Diferenta Simetrica: ";
-    for (int i = 0; i < k; i++) {
-        cout << rezultat[i] << " ";
+    for (int i : rezultat) {
+        cout << i << " ";
     }
     cout << endl;
 
