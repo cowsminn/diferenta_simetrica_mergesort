@@ -1,166 +1,115 @@
 #include <iostream>
 
-#define k 20
+using namespace std;
 
-struct subvector {
-    int v[k] = {0};
-    subvector* next = nullptr;
-};
+void merge(int arr[], int left, int middle, int right) {
+    int n1 = middle - left + 1;
+    int n2 = right - middle;
 
-struct dynvector {
+    int L[n1], R[n2];
 
-    subvector* primul = nullptr;
+    for (int i = 0; i < n1; i++)
+        L[i] = arr[left + i];
+    for (int j = 0; j < n2; j++)
+        R[j] = arr[middle + 1 + j];
 
-    void update(int poz, int x) {
-        int nrnod = poz / k;
-        int pozvector = poz % k;
+    int i = 0, j = 0, k = left;
 
-        if (nrnod >= 7) {
-            std::cerr << "noduri setate - 7" << std::endl;
-            exit(1);
-        }
-
-        subvector* current = primul;
-        subvector* prev = nullptr;
-
-        for (int i = 0; i < nrnod; i++) {
-            if (current == nullptr) {
-                current = new subvector();
-                if (prev != nullptr) {
-                    prev->next = current;
-                } else {
-                    primul = current;
-                }
-                current->next = nullptr;
-            }
-            prev = current;
-            current = current->next;
-        }
-
-        /// in caz ca poz < 20 => nrnod = 0 => nu intra pe for
-
-        if (current == nullptr) {
-            current = new subvector();
-            if (prev != nullptr) {
-                prev->next = current;
-            } else {
-                primul = current;
-            }
-            current->next = nullptr;
-        }
-        current->v[pozvector] = x;
-    }
-
-    int get(int poz) {
-        int nrnod = poz / k;
-        int pozvector = poz % k;
-
-        if (nrnod >= 7) {
-            std::cerr << "noduri setate - 7" << std::endl;
-            exit(1);
-        }
-
-        subvector* current = primul;
-
-        for (int i = 0; i < nrnod; i++) {
-            if (current == nullptr) {
-                return 0;
-            }
-            current = current->next;
-        }
-
-        if (current == nullptr) {
-            return 0;
-        }
-
-        return current->v[pozvector];
-    }
-
-    dynvector operator+(const dynvector& other) const {
-        dynvector rez;
-
-        subvector* currentv = primul;
-        subvector* currentother = other.primul;
-
-        while (currentv != nullptr || currentother != nullptr) {
-            subvector suma;
-
-            if (currentv != nullptr) {
-                for (int j = 0; j < k; j++) {
-                    suma.v[j] += currentv->v[j];
-                }
-                currentv = currentv->next;
-            }
-
-            if (currentother != nullptr) {
-                for (int j = 0; j < k; j++) {
-                    suma.v[j] += currentother->v[j];
-                }
-                currentother = currentother->next;
-            }
-
-            /*
-            if (rez.primul == nullptr) {
-                rez.primul = new subvector(suma);
-            } else {
-                subvector* current = rez.primul;
-                while (current->next != nullptr) {
-                    current = current->next;
-                }
-                current->next = new subvector(suma);
-            }
-            */
-
-            rez.lipirev(suma);
-        }
-
-        return rez;
-    }
-
-
-    void lipirev(const subvector& v) {
-        subvector* nodnou = new subvector(v);
-        nodnou->next = nullptr;
-
-        if (primul == nullptr) {
-            primul = nodnou;
+    while (i < n1 && j < n2) {
+        if (L[i] <= R[j]) {
+            arr[k] = L[i];
+            i++;
         } else {
-            subvector* current = primul;
-            while (current->next != nullptr) {
-                current = current->next;
+            arr[k] = R[j];
+            j++;
+        }
+        k++;
+    }
+
+    while (i < n1) {
+        arr[k] = L[i];
+        i++;
+        k++;
+    }
+
+    while (j < n2) {
+        arr[k] = R[j];
+        j++;
+        k++;
+    }
+}
+
+void mergeSort(int arr[], int left, int right) {
+    if (left < right) {
+        int middle = left + (right - left) / 2;
+
+        mergeSort(arr, left, middle);
+        mergeSort(arr, middle + 1, right);
+
+        merge(arr, left, middle, right);
+    }
+}
+
+void diferentaSimetrica(int A[], int m, int B[], int n, int rezultat[], int& k) {
+    // Sortăm cele două multimi
+    mergeSort(A, 0, m - 1);
+    mergeSort(B, 0, n - 1);
+
+    int i = 0, j = 0;
+
+    while (i < m && j < n) {
+        if (A[i] < B[j]) {
+            if (k == 0 || A[i] != rezultat[k - 1]) {
+                rezultat[k++] = A[i++];
+            } else {
+                i++;
             }
-            current->next = nodnou;
+        } else if (A[i] > B[j]) {
+            if (k == 0 || B[j] != rezultat[k - 1]) {
+                rezultat[k++] = B[j++];
+            } else {
+                j++;
+            }
+        } else {
+            i++;
+            j++;
         }
     }
 
-    ~dynvector() {
-        subvector* current = primul;
-        while (current != nullptr) {
-            subvector* next = current->next;
-            delete current;
-            current = next;
+    while (i < m) {
+        if (k == 0 || A[i] != rezultat[k - 1]) {
+            rezultat[k++] = A[i++];
+        } else {
+            i++;
         }
     }
-};
+
+    while (j < n) {
+        if (k == 0 || B[j] != rezultat[k - 1]) {
+            rezultat[k++] = B[j++];
+        } else {
+            j++;
+        }
+    }
+}
 
 int main() {
-    dynvector v1, v2;
+    int A[] = {1, 2, 3, 4, 5, 6};
+    int m = sizeof(A) / sizeof(A[0]);
 
-    v1.update(90, 15);
-    v2.update(24, 10);
-    v2.update(90,2);
+    int B[] = {2, 3, 4, 7};
+    int n = sizeof(B) / sizeof(B[0]);
 
-    ///std::cout << v1.get(200); - er
-    ///v1.update(200,200); - er
+    int rezultat[m + n];
+    int k = 0;
 
-    dynvector suma = v1 + v2;
+    diferentaSimetrica(A, m, B, n, rezultat, k);
 
-    for (int i = 0; i < 140; i++) {
-        std::cout << suma.get(i) << " ";
-        if ((i + 1) % 20 == 0) {
-            std::cout << std::endl;
-        }
+    cout << "Diferenta Simetrica: ";
+    for (int i = 0; i < k; i++) {
+        cout << rezultat[i] << " ";
     }
+    cout << endl;
 
     return 0;
 }
